@@ -1,0 +1,1 @@
+{"name": "mantis", "config": {"command": "node", "args": ["/var/minis/shared/mantis-mcp-server/server.js"], "note": "Google Mantis - Agentic Bug Finding & Fixing Framework (18 skills: history, plan, researcher, review, critic, reproduce, patch...)", "enabled": true, "createdAt": 1788760711591}}

@@ -1,0 +1,1 @@
+{"name": "pixel-bridge", "config": {"command": "node", "args": ["/var/minis/shared/pixel-bridge-mcp/dist/index.js"], "startupTimeoutSeconds": 60, "enabled": true, "createdAt": 1788406192774}}

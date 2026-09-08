@@ -1,0 +1,1 @@
+{"name": "codebase-memory", "config": {"command": "/tmp/cbm-wrapper.sh", "note": "Codebase Memory - Knowledge Graph for codebases (DeusData, v0.10.8, 158 langs, local indexing)", "enabled": true, "createdAt": 1788682538201}}

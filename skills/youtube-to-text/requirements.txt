@@ -1,0 +1,5 @@
+# Python deps for the youtube-to-text skill.
+# scripts/setup.sh installs these into an isolated venv via `uv`.
+# Listed here for reference / non-uv installs (pip install -r requirements.txt).
+faster-whisper>=1.2
+requests>=2.32

@@ -1,0 +1,1 @@
+{"name": "synapse", "config": {"command": "synapse-os", "args": ["mcp"], "env": {"SYNAPSE_DB": "/var/minis/workspace/.secrets/synapse.db", "SYNAPSE_EMBED_PROVIDER": "hash"}, "note": "Synapse local-first memory OS", "enabled": true, "createdAt": 1788437036808}}

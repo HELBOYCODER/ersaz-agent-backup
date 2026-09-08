@@ -1,0 +1,13 @@
+{
+  "name": "mantis-mcp-server",
+  "version": "1.0.0",
+  "description": "Google Mantis - Agentic Bug Finding & Fixing Framework MCP Server",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
+  }
+}

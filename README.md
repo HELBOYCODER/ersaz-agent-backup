@@ -1,39 +1,63 @@
 # ersaz-agent-backup
 
-بکاپ شخصی از حافظه، اسکیل‌ها و دانش‌های کلیدی ایجنت ersaz — آخرین آپدیت: 2026-08-23
+بکاپ شخصی از حافظه، اسکیل‌ها، MCPها و کانفیگ ایجنت ersaz — آخرین آپدیت: 2026-09-08
+
+> ⚠️ ریپو **پرایوت** است و شامل توکن‌ها/کلیدهای واقعی داخل لاگ‌های روزانه است. جایی پابلیکش نکن.
 
 ## ساختار
 
 | پوشه | محتوا |
 |---|---|
-| `memory/` | GLOBAL.md (قوانین دائمی کاربر) + لاگ‌های روزانه + SOUL.md |
-| `skills/` | همه ۸۰ skill به‌صورت SKILL.md (شگردهای قابل استفاده مجدد) |
-| `workspace-docs/` | مستندات پروژه‌ها |
+| `memory/` | GLOBAL.md (قوانین دائمی) + SOUL.md + لاگ‌های روزانه 2026-08-22 تا 2026-09-08 |
+| `skills/` | هر ۲۰۸ اسکیل کامل (SKILL.md + اسکریپت‌ها) — مدل ۱.۵ گیگی whisper (`youtube-to-text/models/*.bin`) اسکیپ شده، با `requirements.txt` قابل دانلود مجدد است |
+| `mcp/` | `servers.json` (کانفیگ هر ۱۸ سرور) + `tools/<name>.info.json` + `tools/<name>.tools.json` (لیست تولزها) + `local-src/` (سورس node سرورهای mantis و npvt) |
+| `config/` | خروجی‌های minis-config **بدون سکرت**: providers (سامری)، groups، models، envvars (فقط نام کلیدها)، soul، defaults، memory.enabled |
+| `scripts/restore.sh` | اسکریپت برگردوندن بکاپ به سندباکس تازه |
+
+## آمار این بکاپ
+
+- اسکیل‌ها: ۲۰۸ پوشه، ۹۵۹ فایل SKILL.md
+- MCPها: ۱۸ سرور (mantis، npvt، codebase-memory، super-search، twitter، instagram، wordpress، seo-mcp، synapse، pixel-bridge، strix، playwright، supabase، gitmcp، context7، deepwiki، you، mu)
+- مموری: GLOBAL.md + SOUL.md + ۱۵ لاگ روزانه
 
 ## قوانین دائمی کاربر (از GLOBAL.md)
 
-1. **GitHub-first**: هر چیزی خواستی و نداشتی → اول گیت‌هاب سرچ کن (`gh search repos`)، بعد بقیه وب.
-2. **Skill registration**: هر تکنیک/شگردی که یاد گرفتی → ثبت به‌عنوان Minis skill تا همیشه قابل استفاده باشه.
-3. **WarpFix Pro** برای تعمیر CI/تست‌ها با کلید کاربر.
-4. **Auto-continue**: اگه چت قطع شد و اینترنت هست، بدون پرسیدن ادامه بده.
+1. **Memory-first**: اول memory_get بزن بعد جواب بده.
+2. **GitHub-first**: هر چیزی خواستی و نداشتی → اول گیت‌هاب سرچ کن، بعد بقیه وب.
+3. **Skill registration**: هر تکنیک/شگردی یاد گرفتی → ثبت به‌عنوان Minis skill.
+4. **WarpFix Pro** برای تعمیر CI/تست‌ها با کلید کاربر.
+5. **Auto-continue**: اگه چت قطع شد و اینترنت هست، بدون پرسیدن ادامه بده.
+6. **رفتار انسانی در اتوماسیون**: jitter + ممنوعیت برست + وقفه ۳۰–۶۰ ثانیه‌ای بین اکشن‌های حساس + توقف آنی با دیدن کپچا/لیمیت.
+7. **اعتبارسنجی بصری نهایی**: هر خروجی فرانت/SVG با browser_use + اسکرین‌شات فول‌پیج چندالمانی.
+8. **لینک‌های مارک‌داون قابل لمس**: هیچ naked URL نفرست.
 
-## دستاوردهای کلیدی (2026-08-23)
+## MCPها (۱۸)
 
-- **VPSWala free VPS**: Order #6685126826 — 1CPU/1GB/25GB SSD، 30 روز رایگان. اکانت: kf9m3p7q2w@emalupe.com
-- **vision-captcha شگرد**: حل کپچا با مدل vision (tesseract شکست می‌خوره) → skills/vision-captcha
-- **parse.bot**: 3300+ API آماده برای تبدیل هر سایت به REST API. CLI: parsebot. کلید: pmx_8bd5b8eff4d1b1031e82b6173ad59d07
-- **9router**: گیت‌وی AI روی 95.182.91.212:20128 با ۶ مدل رایگان OpenCode فعال
-- **freebuff**: ایجنت کدنویسی رایگان نصب و راه‌اندازی شده (driver در skills/freebuff)
-- **You.com API**: ~$200 credit، CLI: ydc
-
-## سرورها
-
-| IP | نقش | یادداشت |
+| سرور | نوع | توضیح |
 |---|---|---|
-| 95.182.91.212 | 9router + xray + cf-bypass toolkit | ssh root |
-| 95.182.93.201 | hermes gateway + webui + ربات‌ها | ssh root |
+| mantis | stdio (node) | فریم‌ورک باگ‌یابی گوگل Mantis — ۲۴ تولز |
+| npvt | stdio (node) | سازنده کانتینر NPVT1 نپسترنت‌وی + کردنشال Netra Hub |
+| codebase-memory | stdio | نالج‌گراف کدبیس (DeusData v0.10.8) |
+| super-search | stdio (python3) | سرچ سریع گوگل — ⚠️ فایل workspace پاک شده، فقط info/tools موجوده |
+| twitter | stdio (venv) | کنترل توییتر |
+| instagram | stdio (venv) | کنترل کامل اینستاگرام (۷۵ تولز) — استارت‌آپ سنگین |
+| wordpress | stdio | Claudeus WP MCP — ۱۴۵ تولز |
+| seo-mcp | stdio | آدیت سئو — ۸ تولز |
+| synapse | stdio | حافظه لوکال Synapse OS |
+| pixel-bridge | stdio (node) | تولید تصویر via وب‌پروایدر لاگین‌شده |
+| strix | stdio | پنتست Strix — ۳۸ تولز |
+| playwright | stdio (npx) | اتوماسیون مرورگر headless |
+| supabase | http | MCP رسمی سوپابیس (نیاز به OAuth) |
+| gitmcp | http | داکیومنت هر ریپوی گیت‌هاب (keyless) |
+| context7 | http | داکیومنت به‌روز لایبرری‌ها (keyless) |
+| deepwiki | http | پرسش از دانش هر ریپوی گیت‌هاب (keyless) |
+| you | http | وب‌هوش You.com (نیاز به YOU_API_KEY) |
+| mu | http | پلتفرم ایجنت micro.mu — ۱۱۸ تولز |
 
 ## نحوه restore
 
-فایل‌های `memory/*.md` → `/var/minis/memory/`
-پوشه‌های `skills/*` → `/var/minis/skills/<name>/SKILL.md`
+```sh
+sh scripts/restore.sh
+# بعد: MCPها را از روی mcp/servers.json دوباره add کن،
+# و providers/envvars را در Settings UI از نو بساز (مقادیر سکرت اینجا نیست).
+```

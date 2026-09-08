@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "value": "true",
+  "schema": "bool",
+  "display_name": "Memory enabled (global default)"
+}

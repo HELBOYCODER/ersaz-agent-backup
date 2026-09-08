@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "value": "[{\"id\":\"20cbf63e-f439-44d0-8885-40c1eabb16bb\",\"name\":\"Voice Input\",\"strategy\":\"fallback\",\"fallback_strategy\":\"default\",\"entries\":[{\"entry_id\":\"__builtin_system_speech__\\\/system-asr-online\",\"missing\":true},{\"entry_id\":\"__builtin_system_speech__\\\/system-asr-offline\",\"missing\":true}]},{\"id\":\"5f0666bc-c596-4005-b161-82b191c512c3\",\"name\":\"Voice Output\",\"strategy\":\"fallback\",\"fallback_strategy\":\"default\",\"entries\":[{\"entry_id\":\"__builtin_system_speech__\\\/system-tts\",\"missing\":true},{\"entry_id\":\"ccd0b65c-9218-4a16-8211-bcd978afe3a0\\\/xiaomi-tokenplan\\\/mimo-v2-tts\",\"missing\":true}]}]",
+  "schema": "json",
+  "display_name": "Model groups (summary)"
+}

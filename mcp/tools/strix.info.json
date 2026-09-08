@@ -1,0 +1,1 @@
+{"name": "strix", "config": {"command": "strix-mcp", "env": {"STRIX_MCP_ALLOWED_TOOLS": "", "STRIX_REPO": "/tmp/strix"}, "note": "Strix pentesting MCP: ALL 38 tools enabled — no allowlist filter.", "enabled": true, "createdAt": 1787664051759}}

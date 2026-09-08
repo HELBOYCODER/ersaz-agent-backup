@@ -1,0 +1,1 @@
+{"name": "playwright", "config": {"command": "npx", "args": ["@playwright/mcp@latest", "--executable-path", "/usr/bin/chromium-browser", "--headless"], "note": "Playwright MCP: browser automation via accessibility tree. Headless Chromium.", "enabled": true, "createdAt": 1787653184701}}

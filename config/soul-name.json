@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "value": "\"ersaz\"",
+  "schema": "string max 64 chars",
+  "display_name": "Soul name"
+}

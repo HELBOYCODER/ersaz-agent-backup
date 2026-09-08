@@ -1,0 +1,1 @@
+{"name": "context7", "config": {"url": "https://mcp.context7.com/mcp", "note": "Up-to-date docs for any library injected into LLM context. Keyless. Tools: resolve-library-id, get-library-docs", "enabled": true, "createdAt": 1787507361770}}

@@ -1,0 +1,1 @@
+{"name": "supabase", "config": {"url": "https://mcp.supabase.com/mcp", "note": "Supabase official MCP: query DB, manage schema, auth, RLS policies. OAuth login needed on first use.", "enabled": true, "createdAt": 1787650664777}}

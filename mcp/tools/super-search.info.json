@@ -1,0 +1,1 @@
+{"name": "super-search", "config": {"command": "python3", "args": ["/var/minis/workspace/search_stdio_mcp.py"], "note": "Custom fast Google search MCP", "enabled": true, "createdAt": 1788600707824}}

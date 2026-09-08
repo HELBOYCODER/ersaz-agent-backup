@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "value": "\"auto\"",
+  "schema": "one of: auto, zh, en",
+  "display_name": "Soul language"
+}

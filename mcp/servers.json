@@ -1,0 +1,162 @@
+{
+  "mcpServers": {
+    "mantis": {
+      "command": "node",
+      "args": [
+        "\/var\/minis\/shared\/mantis-mcp-server\/server.js"
+      ],
+      "note": "Google Mantis - Agentic Bug Finding & Fixing Framework (18 skills: history, plan, researcher, review, critic, reproduce, patch...)",
+      "enabled": true,
+      "createdAt": 1788760711591
+    },
+    "npvt": {
+      "command": "node",
+      "args": [
+        "\/var\/minis\/shared\/npvt-mcp\/server.js"
+      ],
+      "note": "NapsternetV NPVT1 generator and Cloudflare Netra Hub credentials",
+      "enabled": true,
+      "createdAt": 1788752534168
+    },
+    "codebase-memory": {
+      "command": "\/tmp\/cbm-wrapper.sh",
+      "note": "Codebase Memory - Knowledge Graph for codebases (DeusData, v0.10.8, 158 langs, local indexing)",
+      "enabled": true,
+      "createdAt": 1788682538201
+    },
+    "super-search": {
+      "command": "python3",
+      "args": [
+        "\/var\/minis\/workspace\/search_stdio_mcp.py"
+      ],
+      "note": "Custom fast Google search MCP",
+      "enabled": true,
+      "createdAt": 1788600707824
+    },
+    "twitter": {
+      "command": "\/var\/minis\/shared\/twitter-mcp\/venv\/bin\/python",
+      "args": [
+        "\/var\/minis\/shared\/twitter-mcp\/server.py"
+      ],
+      "enabled": true,
+      "createdAt": 1788544470286
+    },
+    "instagram": {
+      "command": "\/var\/minis\/shared\/instagram-mcp\/venv\/bin\/python",
+      "args": [
+        "-m",
+        "instagram_mcp_server"
+      ],
+      "env": {
+        "INSTAGRAM_SESSION_DIR": "\/var\/minis\/shared\/instagram-mcp",
+        "PYTHONPATH": "\/var\/minis\/shared\/instagram-mcp"
+      },
+      "startupTimeoutSeconds": 60,
+      "note": "Instagram full-control MCP (instagrapi) — 75 tools: account control + professional analytics",
+      "enabled": true,
+      "createdAt": 1788534036990
+    },
+    "wordpress": {
+      "command": "claudeus-wp-mcp",
+      "env": {
+        "WP_SITES_PATH": "\/var\/minis\/workspace\/wp-sites.json"
+      },
+      "startupTimeoutSeconds": 120,
+      "note": "Claudeus WordPress MCP - 145 tools",
+      "enabled": true,
+      "createdAt": 1788509876493
+    },
+    "seo-mcp": {
+      "command": "seo-mcp",
+      "note": "SEO MCP - 8 tools: on-page audit, robots.txt, sitemap, structured data, broken links, keyword ideas, PageSpeed",
+      "enabled": true,
+      "createdAt": 1788509731464
+    },
+    "synapse": {
+      "command": "synapse-os",
+      "args": [
+        "mcp"
+      ],
+      "env": {
+        "SYNAPSE_DB": "\/var\/minis\/workspace\/.secrets\/synapse.db",
+        "SYNAPSE_EMBED_PROVIDER": "hash"
+      },
+      "note": "Synapse local-first memory OS",
+      "enabled": true,
+      "createdAt": 1788437036808
+    },
+    "pixel-bridge": {
+      "command": "node",
+      "args": [
+        "\/var\/minis\/shared\/pixel-bridge-mcp\/dist\/index.js"
+      ],
+      "startupTimeoutSeconds": 60,
+      "enabled": true,
+      "createdAt": 1788406192774
+    },
+    "strix": {
+      "command": "strix-mcp",
+      "env": {
+        "STRIX_MCP_ALLOWED_TOOLS": "",
+        "STRIX_REPO": "\/tmp\/strix"
+      },
+      "note": "Strix pentesting MCP: ALL 38 tools enabled — no allowlist filter.",
+      "enabled": true,
+      "createdAt": 1787664051759
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright\/mcp@latest",
+        "--executable-path",
+        "\/usr\/bin\/chromium-browser",
+        "--headless"
+      ],
+      "note": "Playwright MCP: browser automation via accessibility tree. Headless Chromium.",
+      "enabled": true,
+      "createdAt": 1787653184701
+    },
+    "supabase": {
+      "url": "https:\/\/mcp.supabase.com\/mcp",
+      "note": "Supabase official MCP: query DB, manage schema, auth, RLS policies. OAuth login needed on first use.",
+      "enabled": true,
+      "createdAt": 1787650664777
+    },
+    "gitmcp": {
+      "url": "https:\/\/gitmcp.io\/docs",
+      "note": "GitMCP: generic MCP for any GitHub repo docs (fetch_documentation, search). Keyless.",
+      "enabled": true,
+      "createdAt": 1787507383313
+    },
+    "context7": {
+      "url": "https:\/\/mcp.context7.com\/mcp",
+      "note": "Up-to-date docs for any library injected into LLM context. Keyless. Tools: resolve-library-id, get-library-docs",
+      "enabled": true,
+      "createdAt": 1787507361770
+    },
+    "deepwiki": {
+      "url": "https:\/\/mcp.deepwiki.com\/mcp",
+      "note": "DeepWiki: ask questions about ANY GitHub repo, gets structured answers w\/ repo knowledge. Keyless.",
+      "enabled": true,
+      "createdAt": 1787507361770
+    },
+    "you": {
+      "url": "https:\/\/api.you.com\/mcp",
+      "headers": {
+        "Authorization": "Bearer $$YOU_API_KEY"
+      },
+      "note": "You.com web intelligence MCP: you-search \/ you-contents \/ you-answer \/ you-research \/ you-finance. Needs YOU_API_KEY env var in Minis settings.",
+      "enabled": true,
+      "createdAt": 1787506439798
+    },
+    "mu": {
+      "url": "https:\/\/micro.mu\/mcp",
+      "headers": {
+        "Authorization": "Bearer $MU_TOKEN"
+      },
+      "note": "Mu agent platform (micro.mu) - 118 tools: news, web search\/fetch, browser, mail, markets, weather, video, files, notes, flights, transit, prayer, sms, wallet\/x402",
+      "enabled": true,
+      "createdAt": 1787495308764
+    }
+  }
+}

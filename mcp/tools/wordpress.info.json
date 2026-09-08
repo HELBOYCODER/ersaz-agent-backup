@@ -1,0 +1,1 @@
+{"name": "wordpress", "config": {"command": "claudeus-wp-mcp", "env": {"WP_SITES_PATH": "/var/minis/workspace/wp-sites.json"}, "startupTimeoutSeconds": 120, "note": "Claudeus WordPress MCP - 145 tools", "enabled": true, "createdAt": 1788509876493}}

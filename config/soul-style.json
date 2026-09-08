@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "value": "\"devil\"",
+  "schema": "string max 256 chars",
+  "display_name": "Soul style"
+}

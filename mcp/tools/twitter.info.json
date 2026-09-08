@@ -1,0 +1,1 @@
+{"name": "twitter", "config": {"command": "/var/minis/shared/twitter-mcp/venv/bin/python", "args": ["/var/minis/shared/twitter-mcp/server.py"], "enabled": true, "createdAt": 1788544470286}}

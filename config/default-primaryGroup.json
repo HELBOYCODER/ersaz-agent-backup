@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "value": "\"\"",
+  "schema": "string max 200 chars",
+  "display_name": "Default primary group"
+}

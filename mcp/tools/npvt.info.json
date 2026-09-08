@@ -1,0 +1,1 @@
+{"name": "npvt", "config": {"command": "node", "args": ["/var/minis/shared/npvt-mcp/server.js"], "note": "NapsternetV NPVT1 generator and Cloudflare Netra Hub credentials", "enabled": true, "createdAt": 1788752534168}}

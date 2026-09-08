@@ -1,0 +1,1 @@
+{"name": "mu", "config": {"url": "https://micro.mu/mcp", "headers": {"Authorization": "Bearer $MU_TOKEN"}, "note": "Mu agent platform (micro.mu) - 118 tools: news, web search/fetch, browser, mail, markets, weather, video, files, notes, flights, transit, prayer, sms, wallet/x402", "enabled": true, "createdAt": 1787495308764}}
