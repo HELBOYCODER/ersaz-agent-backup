@@ -1,0 +1,36 @@
+{
+ "date": "2026-09-08",
+ "keys_set": [
+  "CLOUDFLARE2_API_TOKEN",
+  "CLOUDFLARE_API_TOKEN",
+  "GEMINI_API_KEY",
+  "GH_TOKEN",
+  "MU_TOKEN",
+  "TG_BOT_TOKEN",
+  "UNUSUAL_WHALES_API_KE",
+  "VERCEL_TOKEN",
+  "WHALES",
+  "YOU_API_KEY"
+ ],
+ "keys_not_set": [
+  "UNUSUAL_WHALES_API_KEY"
+ ],
+ "files": {
+  "/root/.npmrc": {
+   "copied": true
+  },
+  "/root/.git-credentials": {
+   "copied": true
+  },
+  "/var/minis/workspace/.secrets/synapse.db": {
+   "copied": true
+  },
+  "/var/minis/workspace/wp-sites.json": {
+   "copied": false,
+   "err": "FileNotFoundError"
+  },
+  "/var/minis/mcp-servers/servers.json": {
+   "copied": true
+  }
+ }
+}
