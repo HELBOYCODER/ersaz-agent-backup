@@ -1788,6 +1788,40 @@ var Router = {
     }
   },
   async handlePanel(request2, env3) {
+    // ── ADMIN PANEL GUARD ──
+    try {
+      const adminRow = await env3.DB.prepare("SELECT value FROM settings WHERE key='admin_tg_id'").first();
+      const adminId = adminRow?.value?.trim();
+      if (adminId) {
+        const url2 = new URL(request2.url);
+        // token = first 24 chars of sha256(adminId:botToken) — deterministic
+        let botTok = ""; try { const r=await env3.DB.prepare("SELECT value FROM settings WHERE key='telegram_bot_token'").first(); if(r?.value) botTok=r.value.trim(); } catch(e){}
+        let expected = "";
+        if (botTok) {
+          const enc = new TextEncoder().encode(adminId+":"+botTok);
+          const buf = await crypto.subtle.digest("SHA-256", enc);
+          expected = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+        }
+        const qToken = url2.searchParams.get("token") || url2.searchParams.get("admin_token");
+        const cookie = request2.headers.get("Cookie")||"";
+        const cToken = (cookie.split(";").find(c=>c.trim().startsWith("admin_token="))||"").split("=")[1]?.trim() || "";
+        // also allow panel_session if it was issued via bot token flow? for now require token
+        // If has valid token in query, set cookie and allow
+        if (qToken && expected && qToken === expected) {
+          // will set cookie via response header later — allow through
+        } else if (cToken && expected && cToken === expected) {
+          // allowed
+        } else {
+          // Check if request has valid panel_session AND was previously verified?
+          // For strict mode: block panel entirely without admin_token
+          // Return 403 page with instruction
+          const host2 = url2.hostname;
+          const botLink = "https://t.me/netranew_bot";
+          return new Response(`<!doctype html><html dir="rtl" lang="fa"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>⛔ دسترسی محدود</title><style>body{font-family:sans-serif;background:#020617;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px} .card{max-width:520px;background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:32px;text-align:center} h1{color:#f87171} a{color:#38bdf8} code{background:#1e293b;padding:2px 6px;border-radius:6px}</code></style></head><body><div class="card"><h1>⛔ فقط مدیر دسترسی دارد</h1><p>این پنل فقط برای مدیر (ID: <code>${adminId}</code>) فعال است.</p><p>برای دریافت لینک ورود، از تلگرام با اکانت مدیر به ربات پیام دهید:</p><p><a href="${botLink}">${botLink}</a> → دستور <code>/panel</code> یا <code>/start</code></p><p style="font-size:13px;opacity:.7;margin-top:16px">اگر مدیر هستید، از ربات لینک شخصی‌تان را بگیرید. بقیه اکانت‌ها مسدود هستند.</p></div></body></html>`,{status:403,headers:{"Content-Type":"text/html; charset=utf-8"}});
+        }
+      }
+    } catch(e) {}
+
     const hasPassword = await DbService.getPanelPassword(env3.DB);
     let gfxSetting = "false";
     try {
@@ -1807,13 +1841,16 @@ var Router = {
         headers: { "Content-Type": "text/html; charset=utf-8" }
       });
     }
+    // set admin_token cookie if accessed via token query
+    let _adminCookie = "";
+    try {
+      const u2 = new URL(request2.url);
+      const qT = u2.searchParams.get("token") || u2.searchParams.get("admin_token");
+      if (qT) _adminCookie = "admin_token="+qT+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000";
+    } catch(e) {}
+    const panelHeaders = _adminCookie ? { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", Pragma: "no-cache", Expires: "0", "Set-Cookie": _adminCookie } : { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", Pragma: "no-cache", Expires: "0" };
     return new Response(HTML_TEMPLATES.panel.replace(/\/\*\{\{GFX_SETTING\}\}\*\//g, gfxSetting), {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-        Pragma: "no-cache",
-        Expires: "0"
-      }
+      headers: panelHeaders
     });
   },
   async handleUserStatus(url, env3) {
@@ -1889,6 +1926,33 @@ var Router = {
     }
   },
   async handleApi(request2, url, env3, ctx) {
+    // ── ADMIN API GUARD ──
+    try {
+      const adminRow = await env3.DB.prepare("SELECT value FROM settings WHERE key='admin_tg_id'").first();
+      const adminId = adminRow?.value?.trim();
+      if (adminId) {
+        let botTok = ""; try { const r=await env3.DB.prepare("SELECT value FROM settings WHERE key='telegram_bot_token'").first(); if(r?.value) botTok=r.value.trim(); } catch(e){}
+        let expected = "";
+        if (botTok) {
+          const enc = new TextEncoder().encode(adminId+":"+botTok);
+          const buf = await crypto.subtle.digest("SHA-256", enc);
+          expected = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+        }
+        const qToken = url.searchParams.get("token") || url.searchParams.get("admin_token");
+        const cookie = request2.headers.get("Cookie")||"";
+        const cToken = (cookie.split(";").find(c=>c.trim().startsWith("admin_token="))||"").split("=")[1]?.trim() || "";
+        const headerToken = request2.headers.get("X-Admin-Token")?.trim() || "";
+        // allow /api/login and /api/setup-password without token? No — still need admin token for those
+        // Check token; if valid, allow; else if path is login etc, still block unless token present
+        const hasValidAdmin = expected && (qToken===expected || cToken===expected || headerToken===expected);
+        // For API, also allow if request comes from Telegram webhook internal? no
+        if (!hasValidAdmin) {
+          // Allow Telegram webhook itself? That's separate route, not /api
+          // Block
+          return new Response(JSON.stringify({error:"⛔ فقط مدیر دسترسی دارد — توکن ادمین نامعتبر"}),{status:403,headers:{"Content-Type":"application/json; charset=utf-8"}});
+        }
+      }
+    } catch(e) {}
     const hasPassword = await DbService.getPanelPassword(env3.DB);
     if (url.pathname === "/api/setup-password" && request2.method === "POST") {
       if (hasPassword) {
@@ -12140,6 +12204,18 @@ async function _safeHandleTelegramWebhook(request2, env3, url) {
   if (!botToken)
     return new Response("No Bot Token", { status: 200 });
   const host = url.hostname;
+  // ── ADMIN-ONLY GUARD (GLOBAL SECURITY RULE) ──
+  let adminTgId = null;
+  try {
+    const adminRow = await env3.DB.prepare("SELECT value FROM settings WHERE key = 'admin_tg_id'").first();
+    if (adminRow && adminRow.value) adminTgId = String(adminRow.value).trim();
+  } catch(e) {}
+  // helper to check admin
+  function isAdminChat(id){ return !adminTgId || String(id) === String(adminTgId); }
+  async function denyAccess(chatId2){
+    try{ await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:chatId2,text:"⛔ فقط مدیر دسترسی دارد.",parse_mode:"HTML"})}); }catch(e){}
+    return new Response("OK",{status:200});
+  }
   async function sendMsg(chatId2, text2, replyMarkup = null) {
     const body = { chat_id: chatId2, text: text2, parse_mode: "HTML" };
     if (replyMarkup)
@@ -12337,6 +12413,18 @@ async function _safeHandleTelegramWebhook(request2, env3, url) {
   const data = update.callback_query?.data;
   if (!chatId)
     return new Response("OK", { status: 200 });
+  // ── ADMIN CHECK ──
+  // callback sender may differ from chatId in groups; also check callback from
+  const senderId = update.callback_query?.from?.id || update.message?.from?.id || chatId;
+  if (adminTgId && String(senderId) !== String(adminTgId) && String(chatId) !== String(adminTgId)) {
+    // Allow /start to claim admin if none set? No — admin already set, so deny
+    await denyAccess(chatId);
+    return new Response("OK", { status: 200 });
+  }
+  // Auto-claim: if no admin set and this is /start, claim it
+  if (!adminTgId && text === "/start" && chatId) {
+    try { await env3.DB.prepare("INSERT OR REPLACE INTO settings (key,value) VALUES ('admin_tg_id',?)").bind(String(chatId)).run(); adminTgId = String(chatId); } catch(e){}
+  }
   if (update.callback_query) {
     try {
       await fetch("https://api.telegram.org/bot" + botToken + "/answerCallbackQuery", {
@@ -12357,6 +12445,17 @@ async function _safeHandleTelegramWebhook(request2, env3, url) {
   if (text === "/start" || data === "menu_start") {
     await setState(chatId, null);
     const welcome = "\u26A1 <b>\u0631\u0628\u0627\u062A \u0645\u062F\u06CC\u0631\u06CC\u062A \u0648 \u0641\u0631\u0648\u0634 NETRA HUB</b>\n\n\u0633\u0631\u0648\u0631\u0647\u0627\u06CC \u0628\u0647\u06CC\u0646\u0647\u200C\u0634\u062F\u0647 \u0632\u0626\u0648\u0633 \u0628\u0631\u0627\u06CC \u062A\u0645\u0627\u0645\u06CC \u0627\u067E\u0631\u0627\u062A\u0648\u0631\u0647\u0627 (\u0647\u0645\u0631\u0627\u0647 \u0627\u0648\u0644\u060C \u0627\u06CC\u0631\u0627\u0646\u0633\u0644\u060C \u0631\u0627\u06CC\u062A\u0644\u060C \u0645\u062E\u0627\u0628\u0631\u0627\u062A).\n\n\u{1F539} <b>\u062F\u0633\u062A\u0648\u0631\u0627\u062A \u0639\u0645\u0648\u0645\u06CC:</b>\n\u2022 <code>/sub [\u0646\u0627\u0645]</code> : \u062F\u0631\u06CC\u0627\u0641\u062A \u0644\u06CC\u0646\u06A9 \u0648 QR Code\n\u2022 <code>/status [\u0646\u0627\u0645]</code> : \u0628\u0631\u0631\u0633\u06CC \u0645\u0627\u0646\u062F\u0647 \u062A\u0631\u0627\u0641\u06CC\u06A9 \u0648 \u0627\u0639\u062A\u0628\u0627\u0631\n\u2022 <code>/npv [\u0646\u0627\u0645]</code> : \u062F\u0631\u06CC\u0627\u0641\u062A \u06A9\u0627\u0646\u0641\u06CC\u06AF \u062A\u06A9\u200C\u0628\u0631 \u0645\u062E\u0635\u0648\u0635 NapsternetV\n\n\u{1F538} <b>\u0628\u062E\u0634 \u0641\u0631\u0648\u0634 \u0648 \u0645\u062F\u06CC\u0631\u06CC\u062A:</b>\n\u2022 <b>\u0644\u06CC\u0633\u062A \u0648 \u0645\u062F\u06CC\u0631\u06CC\u062A \u06A9\u0627\u0631\u0628\u0631\u0627\u0646:</b> <code>/users</code>\n\u2022 <b>\u0633\u0627\u062E\u062A \u06A9\u0627\u0631\u0628\u0631 \u062C\u062F\u06CC\u062F:</b> <code>/add</code>\n\u2022 <b>\u062D\u0630\u0641 \u06A9\u0627\u0631\u0628\u0631:</b> <code>/del [\u0646\u0627\u0645]</code>\n\u2022 <b>\u0648\u06CC\u0631\u0627\u06CC\u0634 \u06A9\u0627\u0631\u0628\u0631:</b> <code>/edit [\u0646\u0627\u0645] [\u062D\u062C\u0645] [\u0631\u0648\u0632]</code>\n\u2022 <b>\u0645\u0633\u062F\u0648\u062F / \u0631\u0641\u0639 \u0645\u0633\u062F\u0648\u062F\u06CC:</b> <code>/block [\u0646\u0627\u0645]</code> \u0648 <code>/unblock [\u0646\u0627\u0645]</code>\n\u2022 <b>\u0635\u0641\u0631 \u06A9\u0631\u062F\u0646 \u0645\u0635\u0631\u0641:</b> <code>/reset [\u0646\u0627\u0645]</code>\n\u2022 <b>\u0622\u0645\u0627\u0631 \u06A9\u0644 \u0633\u0631\u0648\u0631:</b> <code>/stats</code>\n\u2022 <b>\u0648\u0628\u200C\u067E\u0646\u0644 \u0645\u062F\u06CC\u0631\u06CC\u062A:</b> <code>/web</code>";
+    // generate admin panel token link
+    let adminPanelUrl = "https://" + host + "/panel";
+    try {
+      if (adminTgId) {
+        let bt = botToken;
+        const enc2 = new TextEncoder().encode(String(adminTgId)+":"+bt);
+        const buf2 = await crypto.subtle.digest("SHA-256", enc2);
+        const tok2 = Array.from(new Uint8Array(buf2)).map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+        adminPanelUrl = "https://" + host + "/panel?token="+tok2;
+      }
+    } catch(e) {}
     const keyboard = {
       inline_keyboard: [
         [{ text: "\u{1F465} \u0644\u06CC\u0633\u062A \u0648 \u0645\u062F\u06CC\u0631\u06CC\u062A \u06A9\u0627\u0631\u0628\u0631\u0627\u0646", callback_data: "list_users_0" }, { text: "\u2795 \u0633\u0627\u062E\u062A \u06A9\u0627\u0631\u0628\u0631 \u062C\u062F\u06CC\u062F", callback_data: "wizard_start" }],
@@ -12369,6 +12468,19 @@ async function _safeHandleTelegramWebhook(request2, env3, url) {
       await sendMsg(chatId, welcome, keyboard);
     }
     return new Response("OK", { status: 200 });
+  }
+  if (text === "/panel" || text === "/web" || data === "cmd_panel") {
+    let pUrl = "https://" + host + "/panel";
+    try {
+      if (adminTgId) {
+        const enc3 = new TextEncoder().encode(String(adminTgId)+":"+botToken);
+        const buf3 = await crypto.subtle.digest("SHA-256", enc3);
+        const tok3 = Array.from(new Uint8Array(buf3)).map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+        pUrl = "https://" + host + "/panel?token="+tok3;
+      }
+    } catch(e){}
+    await sendMsg(chatId, "🔐 <b>لینک پنل مدیر:</b>\n<code>"+pUrl+"</code>\n\n<i>این لینک فقط برای شما معتبر است. آن را به کسی ندهید.</i>", {inline_keyboard:[[{text:"🌐 باز کردن پنل", url:pUrl}]]});
+    return new Response("OK",{status:200});
   }
   if (text === "/stats" || data === "cmd_stats") {
     const countRow = await env3.DB.prepare("SELECT COUNT(*) as cnt, SUM(used_gb) as total_used, SUM(CASE WHEN is_active=1 THEN 1 ELSE 0 END) as active_cnt FROM users").first();
