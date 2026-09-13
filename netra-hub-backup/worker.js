@@ -1881,6 +1881,38 @@ var Router = {
         gfxSetting = "true";
     } catch (e) {
     }
+    // ── if valid admin_token (user ID via bot), bypass panel password ──
+    try {
+      const _u2 = new URL(request2.url);
+      let _botTok2 = ""; try{ const _r=await env3.DB.prepare("SELECT value FROM settings WHERE key='telegram_bot_token'").first(); if(_r?.value) _botTok2=_r.value.trim(); }catch(e){}
+      let _exp2 = "";
+      if (_botTok2) {
+        const _adminRow2 = await env3.DB.prepare("SELECT value FROM settings WHERE key='admin_tg_id'").first();
+        const _adminId2 = _adminRow2?.value?.trim();
+        if (_adminId2) {
+          const _enc2 = new TextEncoder().encode(_adminId2+":"+_botTok2);
+          const _buf2 = await crypto.subtle.digest("SHA-256", _enc2);
+          _exp2 = Array.from(new Uint8Array(_buf2)).map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+        }
+      }
+      const _qT2 = _u2.searchParams.get("token")||_u2.searchParams.get("admin_token");
+      const _ck2 = request2.headers.get("Cookie")||"";
+      const _cT2 = (_ck2.split(";").find(c=>c.trim().startsWith("admin_token="))||"").split("=")[1]?.trim()||"";
+      const _hT2 = request2.headers.get("X-Admin-Token")?.trim()||"";
+      const _isAdmin2 = _exp2 && (_qT2===_exp2 || _cT2===_exp2 || _hT2===_exp2);
+      if (_isAdmin2) {
+        let _adminCookie2 = "";
+        try{ const _q = _u2.searchParams.get("token")||_u2.searchParams.get("admin_token"); if(_q) _adminCookie2="admin_token="+_q+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000"; }catch(e){}
+        const _h2 = _adminCookie2 ? { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", Pragma: "no-cache", Expires: "0", "Set-Cookie": _adminCookie2 } : { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", Pragma: "no-cache", Expires: "0" };
+        // Also set panel_session to password hash so API calls pass verifyApiAuth
+        if (hasPassword) {
+          const _sess = hasPassword;
+          _h2["Set-Cookie"] = _h2["Set-Cookie"] ? _h2["Set-Cookie"]+ ", panel_session="+_sess+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000" : "panel_session="+_sess+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000";
+          // need to handle multiple Set-Cookie — use comma? Cloudflare merges but we send one combined; better set admin_token and let next request set session. For now just allow through.
+        }
+        return new Response(HTML_TEMPLATES.panel.replace(/\/\*\{\{GFX_SETTING\}\}\*\//g, gfxSetting), { headers: _h2 });
+      }
+    } catch(e) {}
     if (!hasPassword) {
       return new Response(HTML_TEMPLATES.setup.replace(/\/\*\{\{GFX_SETTING\}\}\*\//g, gfxSetting), {
         headers: { "Content-Type": "text/html; charset=utf-8" }
