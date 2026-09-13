@@ -1320,7 +1320,7 @@ async function tcpProbe(host, port){
     // fallback fetch timing
     try{
       const c=new AbortController();
-      const to=setTimeout(()=>c.abort(),1800);
+      const to=setTimeout(()=>c.abort(),700);
       await fetch("http://"+host+":"+port+"/",{signal:c.signal, cf:{cacheEverything:false}});
       clearTimeout(to);
       return Date.now()-t0;
@@ -1363,14 +1363,14 @@ async function buildXrayRealityJson(configs, urlObj) {
   // dedup first then sample
   {
     const seen2=new Set(); const tmp=[];
-    for(const x of pool){ const k=x.p.server+":"+x.p.port+":"+(x.p.uuid||x.p.password||""); if(seen2.has(k)) continue; seen2.add(k); tmp.push(x); if(tmp.length>=180) break; }
+    for(const x of pool){ const k=x.p.server+":"+x.p.port+":"+(x.p.uuid||x.p.password||""); if(seen2.has(k)) continue; seen2.add(k); tmp.push(x); if(tmp.length>=80) break; }
     candidates=tmp;
   }
   let uniq=[];
   if(useBest && candidates.length>8){
     // probe latency with concurrency 24
-    const toProbe=candidates.slice(0,120);
-    const conc=24;
+    const toProbe=candidates.slice(0,60);
+    const conc=48;
     const results=[];
     for(let i=0;i<toProbe.length;i+=conc){
       const slice=toProbe.slice(i,i+conc);
@@ -1380,7 +1380,7 @@ async function buildXrayRealityJson(configs, urlObj) {
       }));
       results.push(...settled);
       // small gap to avoid burst
-      await new Promise(r=>setTimeout(r,30));
+      /* no gap */
     }
     results.sort((a,b)=>a.ms-b.ms);
     // keep only reachable (ms<9000) then top
@@ -1646,17 +1646,17 @@ async function sendBestSub(request, env2, urlObj, ctx){
   if(!pool.length) pool=parsed;
   // dedup
   const seen=new Set(); const uniqPool=[];
-  for(const x of pool){ const k=x.p.server+":"+x.p.port+":"+(x.p.uuid||x.p.password||""); if(seen.has(k)) continue; seen.add(k); uniqPool.push(x); if(uniqPool.length>=180) break; }
+  for(const x of pool){ const k=x.p.server+":"+x.p.port+":"+(x.p.uuid||x.p.password||""); if(seen.has(k)) continue; seen.add(k); uniqPool.push(x); if(uniqPool.length>=80) break; }
   const useBest=!(urlObj.searchParams.get("best")==="0");
   let chosen=[];
   if(useBest && uniqPool.length>count){
     const probeUrl=(h,pt)=> tcpProbe(h,pt);
-    const conc=24; const results=[];
-    for(let i=0;i<Math.min(120,uniqPool.length);i+=conc){
+    const conc=48; const results=[];
+    for(let i=0;i<Math.min(60,uniqPool.length);i+=conc){
       const slice=uniqPool.slice(i,i+conc);
       const part=await Promise.all(slice.map(async e=>({e, ms: await probeUrl(e.p.server,e.p.port)})));
       results.push(...part);
-      await new Promise(r=>setTimeout(r,30));
+      /* no gap */
     }
     results.sort((a,b)=>a.ms-b.ms);
     const filtered=results.filter(r=>r.ms<9000);
