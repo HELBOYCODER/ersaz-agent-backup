@@ -1,0 +1,7 @@
+name = "v2raydar-sub"
+main = "worker.js"
+compatibility_date = "2025-05-01"
+compatibility_flags = ["nodejs_compat"]
+[vars]
+CACHE_TTL = "900"
+ADMIN_KEY = "60d1b3928445ad95b3d4fb43eebddf237fba26f9573c6387216477e1479d9d41"
