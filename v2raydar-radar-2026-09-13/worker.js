@@ -1579,7 +1579,7 @@ a{color:#7c5cff}
 <div class="card">
 <div style="font-weight:700;margin-bottom:8px">لینک‌های مستقیم</div>
 <div id="direct"></div>
-<div class="hint">پورت کلاینت: SOCKS 10808 / HTTP 10809 — داخل Xray/V2RayN/V2RayNG کپی کن. هر لینک خودکار بهترین سرورها رو میده (هر ۲۴ ساعت خودکار رفرش - ضعیف‌ها حذف می‌شن).</div>
+<div class="hint">پورت کلاینت: SOCKS 10808 / HTTP 10809 — داخل Xray/V2RayN/V2RayNG کپی کن. هر لینک خودکار بهترین سرورها رو میده (هر ۲۴ ساعت خودکار رفرش - ضعیف‌ها حذف می‌شن).</div><div class="card" style="text-align:left;direction:ltr;font-size:12px"><b>BEST (از ۲۲هزار — تست‌شده، تازه):</b><br><code id="bestlinks"></code></div>
 </div>
 <div class="card" style="text-align:center;font-size:12px;color:#5c6684">MANUAL: <code id="manual"></code></div>
 </div>
@@ -1605,11 +1605,90 @@ function copyL(){
   const base=ORIGIN+"/xray.json";
   d.innerHTML='<div class=\"badge\"><a href=\"'+base+'?count=10\" target=\"_blank\">xray.json?count=10</a></div> <div class=\"badge\"><a href=\"'+base+'?count=6\" target=\"_blank\">count=6</a></div> <div class=\"badge\"><a href=\"'+base+'?count=16\" target=\"_blank\">count=16</a></div> <div class=\"badge\"><a href=\"'+base+'?best=0\" target=\"_blank\">بدون تست (سریع)</a></div> <div class=\"badge\"><a href=\"'+ORIGIN+'/sub\" target=\"_blank\">/sub قدیمی</a></div>';
   document.getElementById('manual').textContent=base+"?count=10&user=USERNAME";
+  const b=document.getElementById('bestlinks'); if(b){ const o=ORIGIN; b.innerHTML = '<a href="'+o+'/best?count=10" target="_blank">/best (plain, 10 best)</a> — <a href="'+o+'/best64?count=10" target="_blank">/best64 (base64)</a> — <a href="'+o+'/best.json?count=10&user=USERNAME" target="_blank">/best.json (Xray)</a> — <a href="'+o+'/sub" target="_blank">/sub (22k raw)</a>'; }
   gen();
 })();
 </script></body></html>`;
 }
 
+
+async function sendBestSub(request, env2, urlObj, ctx){
+  const count = Math.min(Math.max(parseInt(urlObj.searchParams.get("count")||"10",10)||10,1),32);
+  const user = urlObj.searchParams.get("user")||urlObj.searchParams.get("username")||"";
+  // edge cache per user/count (24h)
+  const cache=caches.default;
+  const key="https://cache.v2raydar/best/"+encodeURIComponent(user)+"/"+count+"?"+(urlObj.searchParams.get("best")||"1");
+  if(!urlObj.searchParams.has("refresh")){
+    const hit=await cache.match(new Request(key));
+    if(hit){
+      const h=new Response(hit.body,hit);
+      h.headers.set("Content-Type","text/plain; charset=utf-8");
+      h.headers.set("X-Cache","HIT"); h.headers.set("X-Update-Interval","24h");
+      h.headers.set("Access-Control-Allow-Origin","*");
+      return h;
+    }
+  }
+  const data=await getConfigs(env2, urlObj);
+  // pick best: same logic as Xray but for raw links
+  // reuse ranking: probe top 120 candidates
+  const parsed=[];
+  for(const c of data.configs){
+    let pp=null;
+    if(c.startsWith("vless://")) pp=parseVless(c);
+    else if(c.startsWith("trojan://")) pp=parseTrojan(c);
+    else if(c.startsWith("vmess://")) pp=parseVmess(c);
+    else continue;
+    if(!pp||!pp.server||!pp.port) continue;
+    parsed.push({raw:c, p:pp});
+  }
+  let pool=parsed.filter(x=>x.p["reality-opts"]&&x.p["reality-opts"]["public-key"]);
+  if(!pool.length) pool=parsed.filter(x=>x.p.tls);
+  if(!pool.length) pool=parsed;
+  // dedup
+  const seen=new Set(); const uniqPool=[];
+  for(const x of pool){ const k=x.p.server+":"+x.p.port+":"+(x.p.uuid||x.p.password||""); if(seen.has(k)) continue; seen.add(k); uniqPool.push(x); if(uniqPool.length>=180) break; }
+  const useBest=!(urlObj.searchParams.get("best")==="0");
+  let chosen=[];
+  if(useBest && uniqPool.length>count){
+    const probeUrl=(h,pt)=> tcpProbe(h,pt);
+    const conc=24; const results=[];
+    for(let i=0;i<Math.min(120,uniqPool.length);i+=conc){
+      const slice=uniqPool.slice(i,i+conc);
+      const part=await Promise.all(slice.map(async e=>({e, ms: await probeUrl(e.p.server,e.p.port)})));
+      results.push(...part);
+      await new Promise(r=>setTimeout(r,30));
+    }
+    results.sort((a,b)=>a.ms-b.ms);
+    const filtered=results.filter(r=>r.ms<9000);
+    const src=filtered.length>=count?filtered:results;
+    chosen=src.slice(0,count).map(r=>r.e);
+    if(chosen.length<count){
+      const have=new Set(chosen.map(x=>x.p.server+":"+x.p.port));
+      for(const x of uniqPool){ if(chosen.length>=count) break; const k=x.p.server+":"+x.p.port; if(!have.has(k)){ chosen.push(x); have.add(k); } }
+    }
+  } else {
+    chosen=uniqPool.slice(0,count);
+  }
+  // apply user personalization to remarks
+  const tagBase = user ? user.replace(/[^a-zA-Z0-9_\-\u0600-\u06FF]/g,"_").slice(0,32) : "";
+  const lines=chosen.map((x,i)=>{
+    let raw=x.raw;
+    if(tagBase){
+      const tag=i===0?tagBase:tagBase+"-"+(i+1);
+      // replace fragment after #
+      if(raw.includes("#")) raw=raw.split("#")[0]+"#"+encodeURIComponent(tag);
+      else raw=raw+"#"+encodeURIComponent(tag);
+    }
+    return raw;
+  });
+  const text=lines.join("\n");
+  const b64 = urlObj.pathname.endsWith("/subscription") || urlObj.pathname.endsWith("/sub") ? text : text; // plain vs base64 handled by caller but for /best we give base64
+  const asBase64 = (urlObj.pathname==="/best" || urlObj.pathname==="/best.txt") ? false : true;
+  const body = asBase64 ? utob(text) : text;
+  const resp=new Response(body,{headers:{"Content-Type":"text/plain; charset=utf-8","Cache-Control":"public, max-age=86400","X-Update-Interval":"24h","X-Cache":"MISS","Access-Control-Allow-Origin":"*"}});
+  ctx.waitUntil(cache.put(new Request(key), resp.clone()));
+  return resp;
+}
 function json(data, status = 200) {
   return new Response(JSON.stringify(data, null, 2), {
     status,
@@ -1732,7 +1811,7 @@ async function handleTelegram(request, env2) {
         + `\n\nدستورات:\n`
         + `/xray — ساب Xray اختصاصی (۱۰ تایی REALITY)\n`
         + `/panel — پنل کاربری\n`
-        + `/config /sub /get — فایل کانفیگ کامل (۲۲هزار)\n`
+        + `/best — ۱۰ تا بهترین تست‌شده (plain, با اسم شخصی) — همون ۲۲هزار ولی تمیز\n/best — ۱۰ تا بهترین تست‌شده — با اسم شخصی\n/config /sub — فایل کامل (۲۲هزار)\n`
         + `/mihomo — کانفیگ Mihomo/Clash`,
         [["⚡ ساب Xray من", "get_xray"],["🌐 پنل کاربری", "get_panel"]]);
     } else if (text.startsWith("/xray") || text === "/reality") {
@@ -1795,6 +1874,10 @@ var src_default = {
         return sendSubscription(await getConfigs(env2, url), true);
       if (path === "/sub" || path === "/subscription.txt")
         return sendSubscription(await getConfigs(env2, url), false);
+      if (path === "/best" || path === "/best.txt" || path === "/best/sub" || path === "/best64" || path === "/top" || path === "/fresh")
+        return sendBestSub(request, env2, url, ctx);
+      if (path === "/best.json" || path === "/best/xray.json")
+        return sendXrayJsonCached(env2, url, ctx);
       if (path === "/panel" || path === "/user" || path === "/dashboard") {
         return new Response(panelHtml(url.origin), { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
       }
@@ -1811,7 +1894,7 @@ var src_default = {
         const d = await getConfigs(env2, url);
         return json(d);
       }
-      return json({ error: "not found", paths: ["/", "/health", "/subscription", "/sub", "/mihomo.yaml", "/xray.json", "/panel", "/xray/:user", "/webhook"] }, 404);
+      return json({ error: "not found", paths: ["/", "/health", "/subscription", "/sub", "/best", "/best.json", "/mihomo.yaml", "/xray.json", "/panel", "/xray/:user", "/webhook"] }, 404);
     } catch (e) {
       return json({ error: String(e) }, 500);
     }
