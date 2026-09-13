@@ -1333,7 +1333,7 @@ async function tcpProbe(host, port){
 }
 
 async function buildXrayRealityJson(configs, urlObj) {
-  const want = 10; // همیشه پیش‌فرض ۱۰ — ?count= برای اورراید
+  const want = 1; // پیش‌فرض ۱ سرور — ?count= برای اورراید (درخواست کاربر)
   const qCount = urlObj && urlObj.searchParams.get("count");
   const finalWant = qCount ? Math.min(Math.max(parseInt(qCount,10)||10,1),32) : want;
   const userRaw = urlObj && (urlObj.searchParams.get("user") || urlObj.searchParams.get("username"));
@@ -1571,7 +1571,7 @@ a{color:#7c5cff}
 <label>نام کاربری (برای لینک اختصاصی)</label>
 <input id="user" placeholder="مثلا ali123" value="">
 <label>تعداد سرور (۵ تا ۳۲)</label>
-<select id="cnt"><option value="6">6</option><option value="8">8</option><option value="10" selected>10 — پیشنهادی</option><option value="16">16</option><option value="24">24</option></select>
+<select id="cnt"><option value="6">6</option><option value="8">8</option><option value="1" selected>1 — پیشنهادی</option><option value="16">16</option><option value="24">24</option></select>
 <div class="row"><button onclick="gen()">ساخت لینک اختصاصی</button><button class="sec" onclick="copyL()">📋 کپی</button></div>
 <div id="out" class="linkbox" style="display:none"></div>
 <div class="hint" id="hint"></div>
