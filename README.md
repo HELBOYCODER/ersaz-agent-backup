@@ -20,6 +20,10 @@
 - MCPها: ۱۸ سرور (mantis، npvt، codebase-memory، super-search، twitter، instagram، wordpress، seo-mcp، synapse، pixel-bridge، strix، playwright، supabase، gitmcp، context7، deepwiki، you، mu)
 - مموری: GLOBAL.md + SOUL.md + ۱۵ لاگ روزانه
 
+## بکاپ Netra Hub
+
+- **پوشه `netra-hub-backup/`**: بکاپ کامل ربات [@netranew_bot](https://t.me/netranew_bot) — شامل `worker.js` + `wrangler.toml` + `schema.sql` + دامپ D1 + پکیج رمزنگاری‌شده `netra-vitals-*.tar.gz.enc` (کلیدهای CF + تلگرام). دیکریپت و ریستور سریع بدون نیاز به گیت‌هاب دیگر → ببین `netra-hub-backup/RESTORE.md` (۴ دستور curl در ۵ دقیقه). تمپلیتی که با `DELETE` خراب شده بود با همین بکاپ برگردانده شد (2026-09-13).
+
 ## قوانین دائمی کاربر (از GLOBAL.md)
 
 1. **Memory-first**: اول memory_get بزن بعد جواب بده.

@@ -1,0 +1,57 @@
+{
+    "result": [
+        {
+            "results": [
+                {
+                    "name": "_cf_KV",
+                    "sql": "CREATE TABLE _cf_KV (\n        key TEXT PRIMARY KEY,\n        value BLOB\n      ) WITHOUT ROWID"
+                },
+                {
+                    "name": "users",
+                    "sql": "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, uuid TEXT, limit_gb REAL, expiry_days INTEGER, ips TEXT, connection_type TEXT, tls TEXT, port INTEGER, used_gb REAL DEFAULT 0, is_active INTEGER DEFAULT 1, last_active INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, advanced_frag TEXT DEFAULT NULL, cipher_suites TEXT DEFAULT NULL, tls_mask TEXT DEFAULT NULL, fingerprint TEXT DEFAULT 'chrome', max_connections INTEGER, limit_req INTEGER, used_req INTEGER DEFAULT 0, ip_limit INTEGER DEFAULT NULL, active_ips TEXT DEFAULT NULL, block_porn INTEGER DEFAULT 0, block_ads INTEGER DEFAULT 0, frag_len TEXT DEFAULT '200-3000', frag_int TEXT DEFAULT '1-2', lifetime_used_gb REAL DEFAULT 0, user_proxy_ip TEXT DEFAULT NULL, user_proxy_iata TEXT DEFAULT NULL, user_socks5 TEXT DEFAULT NULL, auto_reset_vol_days INTEGER DEFAULT 0, auto_reset_req_days INTEGER DEFAULT 0, last_reset_vol_time INTEGER DEFAULT 0, last_reset_req_time INTEGER DEFAULT 0, auto_rotate_ip INTEGER DEFAULT 1, rotate_time INTEGER DEFAULT 0, ip_operator TEXT DEFAULT 'all', ip_count INTEGER DEFAULT 15, last_rotate_time INTEGER DEFAULT 0, auto_rotate_user_proxy INTEGER DEFAULT 0, start_on_first_connect INTEGER DEFAULT 0, first_connection_time INTEGER DEFAULT NULL, trojan_hash TEXT DEFAULT NULL, enable_direct INTEGER DEFAULT 1)"
+                },
+                {
+                    "name": "sqlite_sequence",
+                    "sql": "CREATE TABLE sqlite_sequence(name,seq)"
+                },
+                {
+                    "name": "settings",
+                    "sql": "CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT)"
+                },
+                {
+                    "name": "user_manual_configs",
+                    "sql": "CREATE TABLE user_manual_configs (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, config_line TEXT NOT NULL, label TEXT DEFAULT '', limit_gb REAL DEFAULT 0, expiry_days INTEGER DEFAULT 0, used_gb REAL DEFAULT 0, created_at INTEGER DEFAULT (strftime('%s','now')*1000), is_active INTEGER DEFAULT 1)"
+                },
+                {
+                    "name": "netra_hub_users",
+                    "sql": "CREATE TABLE netra_hub_users (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    username TEXT UNIQUE NOT NULL,\n    uuid TEXT UNIQUE NOT NULL,\n    limit_gb REAL DEFAULT 0,\n    expiry_days INTEGER DEFAULT 30,\n    used_bytes INTEGER DEFAULT 0,\n    is_active INTEGER DEFAULT 1,\n    created_at INTEGER NOT NULL\n)"
+                },
+                {
+                    "name": "netra_hub_settings",
+                    "sql": "CREATE TABLE netra_hub_settings (\n    key TEXT PRIMARY KEY,\n    value TEXT NOT NULL\n)"
+                }
+            ],
+            "success": true,
+            "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "WEUR",
+                "served_by_colo": "AMS",
+                "served_by_primary": true,
+                "timings": {
+                    "sql_duration_ms": 0.1751
+                },
+                "duration": 0.1751,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 57344,
+                "rows_read": 12,
+                "rows_written": 0,
+                "total_attempts": 1
+            }
+        }
+    ],
+    "errors": [],
+    "messages": [],
+    "success": true
+}

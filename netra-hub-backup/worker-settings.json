@@ -1,0 +1,37 @@
+{
+    "result": {
+        "placement": {},
+        "compatibility_date": "2026-07-10",
+        "compatibility_flags": [
+            "nodejs_compat"
+        ],
+        "usage_model": "standard",
+        "tags": [],
+        "tail_consumers": [],
+        "logpush": false,
+        "annotations": {
+            "workers/triggered_by": "upload"
+        },
+        "bindings": [
+            {
+                "name": "CF_ACCOUNT_ID",
+                "text": "d8260cb1310e4d44256bb12573aa1401",
+                "type": "plain_text"
+            },
+            {
+                "database_id": "bdd84bcd-b5a5-4dd6-a763-ea6cf4389128",
+                "id": "bdd84bcd-b5a5-4dd6-a763-ea6cf4389128",
+                "name": "DB",
+                "type": "d1"
+            },
+            {
+                "name": "WORKER_NAME",
+                "text": "netra-hub",
+                "type": "plain_text"
+            }
+        ]
+    },
+    "success": true,
+    "errors": [],
+    "messages": []
+}

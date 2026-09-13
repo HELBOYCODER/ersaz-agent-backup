@@ -1,0 +1,14 @@
+name = "netra-hub"
+account_id = "d8260cb1310e4d44256bb12573aa1401"
+main = "worker.js"
+compatibility_date = "2026-07-10"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ersaz_panel_db"
+database_id = "bdd84bcd-b5a5-4dd6-a763-ea6cf4389128"
+
+[vars]
+WORKER_NAME = "netra-hub"
+CF_ACCOUNT_ID = "d8260cb1310e4d44256bb12573aa1401"

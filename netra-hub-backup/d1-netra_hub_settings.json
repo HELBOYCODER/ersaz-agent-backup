@@ -1,0 +1,41 @@
+{
+    "result": [
+        {
+            "results": [
+                {
+                    "key": "telegram_bot_token",
+                    "value": "8886405909:AAFJtby2WH1rX4FBxlUeEqVNC2KKC_GyDQw"
+                },
+                {
+                    "key": "clean_ips",
+                    "value": "www.speedtest.net,cloudflare.com,104.21.40.3,172.67.172.216,162.159.193.10,188.114.99.1,141.101.90.1"
+                },
+                {
+                    "key": "vps_reality",
+                    "value": "vless://64a0d181-8211-450f-a9f4-4a8873c4e436@ersazno.duckdns.org:443?security=reality&encryption=none&pbk=9_rl6fJecVJ2M3d8EQfbsR2KSLQiQ6jA8re-pBa6DTk&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.speedtest.net&sid=31c59ce74f0d6a25"
+                }
+            ],
+            "success": true,
+            "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "WEUR",
+                "served_by_colo": "AMS",
+                "served_by_primary": true,
+                "timings": {
+                    "sql_duration_ms": 0.3066
+                },
+                "duration": 0.3066,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 57344,
+                "rows_read": 3,
+                "rows_written": 0,
+                "total_attempts": 1
+            }
+        }
+    ],
+    "errors": [],
+    "messages": [],
+    "success": true
+}

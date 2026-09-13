@@ -1,0 +1,53 @@
+{
+  "result": [
+    {
+      "results": [
+        {
+          "key": "req_total",
+          "value": "33953"
+        },
+        {
+          "key": "req_last_date",
+          "value": "2026-09-13"
+        },
+        {
+          "key": "req_today",
+          "value": "8"
+        },
+        {
+          "key": "telegram_bot_token",
+          "value": "REDACTED — see netra-vitals-*.tar.gz.enc/secrets/netra-secrets.json"
+        },
+        {
+          "key": "panel_password",
+          "value": "77f33cb3e69fcae2880e62588ea996ed1a89c06c1a9b6c70c0fdcf261df10f60"
+        },
+        {
+          "key": "last_auto_reset_check",
+          "value": "1789269003257"
+        }
+      ],
+      "success": true,
+      "meta": {
+        "served_by": "v3-prod",
+        "served_by_region": "WEUR",
+        "served_by_colo": "AMS",
+        "served_by_primary": true,
+        "timings": {
+          "sql_duration_ms": 0.1171
+        },
+        "duration": 0.1171,
+        "changes": 0,
+        "last_row_id": 0,
+        "changed_db": false,
+        "size_after": 57344,
+        "rows_read": 6,
+        "rows_written": 0,
+        "total_attempts": 1
+      }
+    }
+  ],
+  "errors": [],
+  "messages": [],
+  "success": true
+}

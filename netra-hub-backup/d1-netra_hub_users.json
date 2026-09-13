@@ -1,0 +1,49 @@
+{
+    "result": [
+        {
+            "results": [
+                {
+                    "id": 1,
+                    "username": "netra_vip",
+                    "uuid": "56fbb38f-cb5c-4289-a547-2928c416f4f9",
+                    "limit_gb": 50,
+                    "expiry_days": 30,
+                    "used_bytes": 0,
+                    "is_active": 1,
+                    "created_at": 1788690062715
+                },
+                {
+                    "id": 2,
+                    "username": "omid",
+                    "uuid": "6b8ddb66-b3a3-4cac-9efd-59229089214b",
+                    "limit_gb": 1,
+                    "expiry_days": 1,
+                    "used_bytes": 0,
+                    "is_active": 1,
+                    "created_at": 1788690162638
+                }
+            ],
+            "success": true,
+            "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "WEUR",
+                "served_by_colo": "AMS",
+                "served_by_primary": true,
+                "timings": {
+                    "sql_duration_ms": 0.3447
+                },
+                "duration": 0.3447,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 57344,
+                "rows_read": 2,
+                "rows_written": 0,
+                "total_attempts": 1
+            }
+        }
+    ],
+    "errors": [],
+    "messages": [],
+    "success": true
+}
