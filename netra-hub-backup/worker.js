@@ -1769,6 +1769,23 @@ var Router = {
     const isSubPath = url.pathname.startsWith("/sub/");
     const offset = isSingbox ? 9 : isSubPath ? 5 : 6;
     let subUser = safeDecodeURI(url.pathname.slice(offset));
+    // ── CHUNK SUPPORT: /sub/<user>/2 or ?page=2&size=10 (default size 10) ──
+    let chunkPage = 0; let chunkSize = 10;
+    try {
+      const qs = url.searchParams;
+      if (qs.get("page")) chunkPage = parseInt(qs.get("page"))||0;
+      if (qs.get("chunk")) chunkPage = parseInt(qs.get("chunk"))||chunkPage;
+      if (qs.get("size")) chunkSize = parseInt(qs.get("size"))||10;
+      if (qs.get("limit")) chunkSize = parseInt(qs.get("limit"))||chunkSize;
+      // path extra: /sub/<user>/2  or /sub/<user>/chunk/2
+      const parts = subUser.split("/").filter(Boolean);
+      if (parts.length > 1) {
+        subUser = parts[0];
+        const maybe = parts[1]==="chunk" ? parts[2] : parts[1];
+        if (maybe && /^\d+$/.test(maybe)) chunkPage = parseInt(maybe);
+        if (parts[1]==="chunk" && parts[2]) chunkSize = 10;
+      }
+    } catch(e) {}
     const host = url.hostname;
     try {
       const user = await env3.DB.prepare("SELECT * FROM users WHERE username = ? COLLATE NOCASE OR uuid = ?").bind(subUser, subUser).first();
@@ -1780,9 +1797,43 @@ var Router = {
       } catch (e) {
       }
       if (isSingbox) {
-        return await SubscriptionService.generateSingbox(user, host);
+        const r = await SubscriptionService.generateSingbox(user, host);
+        // chunk slicing for singbox if requested
+        if (chunkPage > 0) {
+          try {
+            const j = JSON.parse(await r.clone().text());
+            const obs = j.outbounds || [];
+            // keep first 2 (selector/direct) + slice 10
+            const head = obs.slice(0, Math.min(2, obs.length));
+            const tail = obs.slice(2);
+            const start = (chunkPage-1)*chunkSize;
+            const sliced = tail.slice(start, start+chunkSize);
+            j.outbounds = head.concat(sliced);
+            // also patch url_chooser outbounds
+            if (j.outbounds.find(o=>o.tag==="url-chooser")) {
+              j.outbounds.find(o=>o.tag==="url-chooser").outbounds = sliced.map(o=>o.tag);
+            }
+            return new Response(JSON.stringify(j, null, 2), { headers: r.headers });
+          } catch(e) { return r; }
+        }
+        return r;
       }
-      return await SubscriptionService.generateText(user, host);
+      const subRes = await SubscriptionService.generateText(user, host);
+      if (chunkPage > 0) {
+        try {
+          const b64 = await subRes.clone().text();
+          let plain = "";
+          try { plain = decodeURIComponent(escape(atob(b64))); } catch(e){ plain = atob(b64); }
+          const lines = plain.split("\n").filter(l=>l.trim() && !l.startsWith("#"));
+          const start = (chunkPage-1)*chunkSize;
+          const sliced = lines.slice(start, start+chunkSize);
+          const header = `# Chunk ${chunkPage} / ${Math.ceil(lines.length/chunkSize)} — ${sliced.length} configs (size=${chunkSize})\n`;
+          const out = btoa(unescape(encodeURIComponent(header + sliced.join("\n"))));
+          const h = new Headers(subRes.headers);
+          return new Response(out, { headers: h });
+        } catch(e) { return subRes; }
+      }
+      return subRes;
     } catch (err) {
       return new Response("Error building config: " + err.message, { status: 500 });
     }
@@ -3060,7 +3111,16 @@ var SubscriptionService = {
       }
     } catch (e) {
     }
-    const plainContent = noise + links.join("\n");
+    // ── DEFAULT CHUNK: every 10 configs = one visual server block (update fixes sub) ──
+    const _CHUNK = 10;
+    let chunkedLinks = [];
+    for (let _i = 0; _i < links.length; _i += _CHUNK) {
+      const _slice = links.slice(_i, _i + _CHUNK);
+      const _g = Math.floor(_i/_CHUNK)+1;
+      chunkedLinks.push(`# ━━━ Server ${_g} — ${_slice.length} configs ━━━`);
+      chunkedLinks.push(..._slice);
+    }
+    const plainContent = noise + chunkedLinks.join("\n");
     const subContent = btoa(unescape(encodeURIComponent(plainContent)));
     const downloadBytes = Math.floor((user.used_gb || 0) * 1073741824);
     const totalBytes = user.limit_gb ? Math.floor(user.limit_gb * 1073741824) : 0;
